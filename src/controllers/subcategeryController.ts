@@ -1,33 +1,26 @@
-const BaseController=require('../controllers/BaseController');
+// const BaseController=require('../controllers/BaseController');
 
-const subCategory=require('../models/subcategory.model')
 
-class subcategories extends BaseController{
 
-    async createSubcategory( req , res){
-        try {
-            const subcategori=new subCategory(req.body)
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { subcategory } from "../schemas/subcategory.schema.js";
+import SubcategoryMedicine from "../models/subcategory.model.js";
+import ApiResponse from "../utils/ApiResponse.js";
 
-            const save=await subcategori.save();
-            return this.success(res, save, "subCategory created succefull");
-            
-        } catch (error) {
-                     return this.error(res, 400, "failed to create SubCategory", error.message);    
-
+import type { Request, Response, NextFunction } from "express";
+export class SubCategoryController{
+    createSubcategory=asyncHandler(
+        async (req:Request,res:Response,next:NextFunction) => {
+            const parseData=subcategory.parse(req.body);
+            const newSubCategory=new SubcategoryMedicine(parseData)
+            await newSubCategory.save()
+            res.status(201).json(new ApiResponse(201,newSubCategory,"SubCategory Added Successfully"))
         }
-    }
-
-    async getAllsubcategory( req , res){
-        try {
-
-            const allSubCategory=await subCategory.find({})
-            return this.success(res, allSubCategory, "All subCategory");            
-            
-        } catch (error) {
-             return this.error(res, 400, "failed to get All SubCategory", error.message);    
-
+    )
+    getAllsubcategory=asyncHandler(
+        async (req:Request,res:Response,next:NextFunction) => {
+            const allSubCategory=await SubcategoryMedicine.find({})
+            res.status(200).json(new ApiResponse(200,allSubCategory,"All subCategory"))
         }
-    }
+    )
 }
-
-module.exports=new subcategories()

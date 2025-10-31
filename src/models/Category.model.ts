@@ -1,15 +1,17 @@
-const mongoose=require('mongoose')
+import mongoose, { Schema, Document } from "mongoose";
+import type { ICategoryMedicine } from "../types/category.type.js";
 
-const categorySchema=new mongoose.Schema({
 
-    name:{
-        type:String,
-        unique:true,
-        required:true
+const categorySchema = new Schema<ICategoryMedicine>(
+  {
+    name: {
+      type: String,
+      unique: true,
+      required: true,
     }
+  },
+  { timestamps: true }
+);
 
-},
-{timestamps:true})
-
-module.exports=mongoose.model("CategoryMedicine",categorySchema)
-
+const CategoryMedicine = mongoose.model<ICategoryMedicine>("CategoryMedicine", categorySchema);
+export default CategoryMedicine;
