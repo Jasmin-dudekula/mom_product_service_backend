@@ -24,3 +24,40 @@
 // router.put("/edit/:id",(req,res)=>MedicineController.editForm(req,res))
 
 // module.exports = router;
+
+
+import express from "express";
+import multer from "multer";
+import {
+  createManual,
+  uploadCSV,
+  deleteMedicineById,
+  updateMedicine,
+  getMedicineCount,
+  getExpiringMedicines,
+  getProductById,
+  getAllMedicines,
+} from "../controllers/Products/ProductController.js";
+
+const router = express.Router();
+const upload = multer({ dest: "uploads/" });
+router.post("/manual", upload.single("image"), createManual);
+router.post("/csv", upload.single("file"), uploadCSV);
+
+router.get("/all", getAllMedicines);
+
+router.get("/med/:id", getProductById);
+
+router.get("/total", getMedicineCount);
+
+router.get("/exp", getExpiringMedicines);
+
+router.put("/edit/:id", updateMedicine);
+router.delete("/del/:id", deleteMedicineById);
+
+export default router;
+
+
+
+
+
