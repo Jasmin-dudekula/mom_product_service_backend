@@ -1,27 +1,28 @@
+
 import dotenv from "dotenv";
 dotenv.config();
-import app from "./app.js";
-import connectDB from "./db/DBConnect.js";
 
+import connectDB from "./db/connectDB.js";
+
+
+import app from "./app.js";     
 const PORT = process.env.PORT || 3001;
 
 connectDB()
   .then(() => {
-    const server = app.listen(PORT);
-
-    server.on("listening", () => {
-      console.log(`app is listening on port ${PORT}`);
+    const server = app.listen(PORT, () => {
+      console.log(` App is listening on port ${PORT}`);
     });
 
-    server.on("error", (err) => {
-      console.error("server error occured: ", err);
+    server.on("error", (err: Error) => {
+      console.error("Server error occurred:", err);
     });
 
     server.on("close", () => {
-      console.warn("server connection closed !!");
+      console.warn("Server connection closed!");
     });
   })
-  .catch((err) => {
-    console.error("mongodb connection failed : ", err);
+  .catch((err: Error) => {
+    console.error("MongoDB connection failed:", err);
     process.exit(1);
   });

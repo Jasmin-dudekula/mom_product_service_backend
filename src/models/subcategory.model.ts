@@ -1,6 +1,8 @@
-const mongoose = require("mongoose");
+// const mongoose = require("mongoose");
+import mongoose,{Schema} from "mongoose";
+import type { ISubCategory } from "../types/subCategory.type.js";
 
-const subcategorySchema = new mongoose.Schema(
+const subcategorySchema = new Schema<ISubCategory>(
   {
     category: {
       type: mongoose.Schema.Types.ObjectId,
@@ -23,4 +25,5 @@ const subcategorySchema = new mongoose.Schema(
 
 subcategorySchema.index({ name: 1, category: 1 }, { unique: true });
 
-module.exports = mongoose.model("SubcategoryMedicine", subcategorySchema);
+const SubcategoryMedicine=mongoose.model<ISubCategory>("SubcategoryMedicine", subcategorySchema);
+export default SubcategoryMedicine
