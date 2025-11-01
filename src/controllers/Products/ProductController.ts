@@ -148,12 +148,19 @@ export const getMedicineCount = asyncHandler(async (_, res) => {
 
 export const getExpiringMedicines = asyncHandler(async (_, res) => {
   const today = new Date();
-  const expDate = new Date();
-  expDate.setDate(today.getDate() + 10);
-
-  const expiring = await ProductMedicine.find({ expiry: { $lte: expDate } });
+  // const expDate = new Date();
+  // expDate.setDate(today.getDate() + 10);
+  const expiring = await ProductMedicine.find({ expiry: { $lte:today} });
   res.status(200).json(new ApiResponse(200, expiring, "Expiring medicines fetched"));
 });
+
+export const getExpMedCount = asyncHandler(async (_, res) => {
+  const today = new Date();
+  const expiring = await ProductMedicine.find({ expiry: { $lte: today } }).countDocuments();
+  res.status(200).json(new ApiResponse(200, expiring, "Expiring medicines fetched"));
+});
+
+
 
 export const getProductById = asyncHandler(async (req, res) => {
   const { id } = req.params;
