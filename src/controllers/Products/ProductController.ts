@@ -163,7 +163,7 @@ export const getProductById = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, med, "Medicine fetched"));
 });
 
-export const getAllMedicines = asyncHandler(async (req, res) => {
+export const getAll= asyncHandler(async (req, res) => {
   const { search, category, subCategory, type, stockStatus } = req.query;
 
   const query: Record<string, any> = {};
@@ -185,4 +185,67 @@ export const getAllMedicines = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, meds, "Medicines fetched successfully"));
 });
 
+export const filterByType = asyncHandler(async (req, res) => {
+  const { type } = req.query;
+  if (!type || !["medicine", "nonmedicine"].includes(type as string))
+    throw new ApiError(400, "Invalid type. Use 'medicine' or 'nonmedicine'");
 
+  const meds = await ProductMedicine.find({ type }).populate("category subCategory");
+  res.status(200).json(new ApiResponse(200, meds, `${type} products fetched successfully`));
+});
+
+
+export const filterByCreatedAtDate = asyncHandler(async (req, res) => {
+  const { createdAt } = req.query;
+  if (!createdAt) throw new ApiError(400, "createdAt date required");
+
+  const start = new Date(createdAt as string);
+  const end = new Date(createdAt as string);
+  end.setHours(23, 59, 59, 999);
+
+  const meds = await ProductMedicine.find({
+    createdAt: { $gte: start, $lte: end },
+  }).populate("category subCategory");
+
+  res.status(200).json(new ApiResponse(200, meds, "Medicines filtered by createdAt date"));
+});
+
+
+export const filterMedicines = asyncHandler(async (req, res) => {
+  const {
+    category,
+    subCategory,
+    brandName,
+    supplierName,
+    form,
+    strength,
+    intakeroute,
+    doseTime,
+    doseFrequency,
+    prescription,
+  } = req.query;
+
+  const filter: Record<string, any> = {};
+
+  if (category) {
+    const cat = await CategoryMedicine.findOne({ name: (category as string).trim() });
+    if (cat) filter.category = cat._id;
+  }
+
+  if (subCategory) {
+    const subCat = await SubcategoryMedicine.findOne({ name: (subCategory as string).trim() });
+    if (subCat) filter.subCategory = subCat._id;
+  }
+
+  if (brandName) filter.brandName = new RegExp(brandName as string, "i");
+  if (supplierName) filter.supplierName = new RegExp(supplierName as string, "i");
+  if (prescription) filter["details.prescriptionRequired"] = prescription === "true";
+  if (form) filter["details.form"] = new RegExp(form as string, "i");
+  if (strength) filter["details.strength"] = new RegExp(strength as string, "i");
+  if (intakeroute) filter["details.route"] = new RegExp(intakeroute as string, "i");
+  if (doseTime) filter["details.dosageTiming"] = new RegExp(doseTime as string, "i");
+  if (doseFrequency) filter["details.dosageFrequency"] = new RegExp(doseFrequency as string, "i");
+
+  const medicines = await ProductMedicine.find(filter).populate("category subCategory");
+  res.status(200).json(new ApiResponse(200, medicines, "Filtered medicines fetched successfully"));
+});

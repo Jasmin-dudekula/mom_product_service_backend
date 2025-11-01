@@ -22,9 +22,9 @@ app.use(
 );
 app.use(cookieParser());
 
-app.use("/api/product", productRoutes);
-app.use("/api/category", categoryRoutes);
-app.use("/api/subcategory", subCategoryRoutes);
+app.use("/api", productRoutes);
+app.use("/api", categoryRoutes);
+app.use("/api", subCategoryRoutes);
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error("Error caught by middleware:", err);
