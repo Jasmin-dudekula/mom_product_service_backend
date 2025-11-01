@@ -1,3 +1,4 @@
+
 import mongoose, { Schema, Document } from "mongoose";
 
 
@@ -6,3 +7,4 @@ export interface ICategoryMedicine extends Document {
   createdAt?: Date;
   updatedAt?: Date;
 }
+

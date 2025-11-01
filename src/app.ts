@@ -1,3 +1,4 @@
+
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -8,8 +9,6 @@ import { type Request, type Response, type NextFunction } from "express";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import subCategoryRoutes from "./routes/subcategoryRoutes.js"
 import productRoutes from "./routes/ProductRoutes.js"
-import dotenv from "dotenv";
-import path from "path";
 
 
 const app = express();

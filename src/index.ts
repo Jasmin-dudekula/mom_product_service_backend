@@ -1,4 +1,3 @@
-
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -10,7 +9,7 @@ const __dirname = dirname(__filename);
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
-console.log("✅ Loaded .env from:", path.resolve(__dirname, "../.env"));
+console.log("Loaded .env from:", path.resolve(__dirname, "../.env"));
 console.log("AWS_ACCESS_KEY_ID:", process.env.AWS_ACCESS_KEY_ID);
 console.log("AWS_REGION:", process.env.AWS_REGION);
 

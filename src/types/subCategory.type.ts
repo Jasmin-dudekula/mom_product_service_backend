@@ -1,3 +1,4 @@
+
 import mongoose,{Schema,Document} from "mongoose";
 import type { Types } from "mongoose";
 export interface ISubCategory extends Document{
@@ -7,3 +8,4 @@ export interface ISubCategory extends Document{
     createdAt:Date,
     updatedAt:Date
 }
+

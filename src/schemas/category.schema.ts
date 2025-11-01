@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 
 export const category = z.object({
@@ -5,3 +6,4 @@ export const category = z.object({
 });
 
 export type CategoryInput = z.infer<typeof category>;
+

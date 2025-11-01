@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "nodemon --watch src --ext ts,json --exec ts-node-esm src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -22,6 +23,7 @@
     "express": "^5.1.0",
     "mongoose": "^8.19.2",
     "multer": "^2.0.2",
+    "multer-s3": "^3.0.1",
     "nodemon": "^3.1.10",
     "qrcode": "^1.5.4",
     "zod": "^4.1.12"
@@ -31,7 +33,11 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
     "@types/multer": "^2.0.0",
+    "@types/multer-s3": "^3.0.3",
+    "@types/node": "^24.9.2",
     "@types/qrcode": "^1.5.6",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }
 }

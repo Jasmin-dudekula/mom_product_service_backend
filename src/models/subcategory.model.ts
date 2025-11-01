@@ -27,4 +27,5 @@ const subcategorySchema = new Schema<ISubCategory>(
 subcategorySchema.index({ name: 1, category: 1 }, { unique: true });
 
 const SubcategoryMedicine=mongoose.model<ISubCategory>("SubcategoryMedicine", subcategorySchema);
+
 export default SubcategoryMedicine
