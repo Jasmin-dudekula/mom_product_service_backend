@@ -8,6 +8,9 @@ import ApiError from "./utils/ApiError.js";
 import { type Request, type Response, type NextFunction } from "express";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import subCategoryRoutes from "./routes/subcategoryRoutes.js"
+import productRoutes from "./routes/ProductRoutes.js"
+
+
 const app = express();
 
 app.use(express.json());
@@ -19,7 +22,7 @@ app.use(
 );
 app.use(cookieParser());
 
-// app.use("/api/product", productRoutes);
+app.use("/api/product", productRoutes);
 app.use("/api/category", categoryRoutes);
 app.use("/api/subcategory", subCategoryRoutes);
 

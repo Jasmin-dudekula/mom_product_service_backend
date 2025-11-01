@@ -1,110 +1,93 @@
-const mongoose = require("mongoose");
-// const { Schema } = mongoose;
+import mongoose, { Schema } from "mongoose";
+import type { IProductMedicine} from "../types/product.type.ts";
 
-const MedicineSchema = new mongoose.Schema({
-    productId: {
-        type: String,
-        required: true,
-
+const MedicineSchema = new mongoose.Schema<IProductMedicine>(
+  {
+    productId: 
+    { type: String, 
+      required: true 
     },
-    name: {
-        type: String,
-        required: true
+    name: 
+    { type: String, 
+      required: true 
     },
-    type:{
-        type:String,
-        enum:['medicine','nonmedicine'],
-        required:true
-
+    type: { 
+      type: String, 
+      enum: ["medicine", "nonmedicine"],
+      required: true 
     },
-    brandName: {
-        type: String,
-        required: true,
-
-    },
+    brandName: { 
+      type: String, 
+      required: true
+     },
     batchNumber: {
-        type: String,
-        required: true,
+      type: String,
+      required: true
+    },
+    supplierName: { 
+    type: String, 
+    required: true 
+    },
+    category: { 
+    type: Schema.Types.ObjectId, 
+    ref: "CategoryMedicine", 
+    required: true 
+   },
+    subCategory: { 
+    type: Schema.Types.ObjectId, 
+    ref: "SubcategoryMedicine", 
+    required: true 
+    },
+    storageInstructions: { 
+    type: String 
+    },
+    quantityPerUnit: { 
+    type: String, 
+    required: true },
 
+    gst: { 
+      type: String 
     },
-    supplierName: {
-        type: String,
-        required: true,
-
+    hsnCode: { 
+      type: String
+     },
+    discount: { 
+      type: String 
     },
-    category: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'CategoryMedicine',
-        required: true
-
+    updatedOn: { 
+      type: Date, 
+      default: Date.now 
     },
-    subCategory: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'SubcategoryMedicine',
-        required: true
-
-    },
-    storageInstructions: {
-        type: String,
-
-    },
-    quantityPerUnit: {
-        type: String,
-        required: true,
-        
-    },
-    gst: {
-        type: String,
-
-    },
-    hsnCode: {
-        type: String,
-
-    },
-    discount: {
-        type: String,
-
-    },
-    updatedOn: {
-        type: Date,
-        default: Date.now,
-    },
-    expiry: {
-        type: Date,
-        
-    },
-    manufactureDate: {
-        type: Date,
-       
+    expiry: { 
+      type: Date
+     },
+    manufactureDate: { 
+      type: Date 
     },
     sellingPrice: {
-        type: Number,
-       
-    },
-    lastSoldDate: {
-        type: Date,
-    },
+       type: Number 
+      },
+    lastSoldDate: { 
+      type: Date
+     },
     stockStatus: {
-        type: String,
-        enum: ["in_stock", "low_stock", "out_of_stock"],
-        default: "in_stock",
+      type: String,
+      enum: ["in_stock", "low_stock", "out_of_stock"],
+      default: "in_stock",
     },
-    imageUrl: {
-        type: String,
+    imageUrl: { 
+      type: String 
     },
     details: {
-        type: Object,
-        default: {}
-    },
-    warehouseId: {
-        // type: Schema.Types.ObjectId,
-        // ref: 'Warehouse',
-        // required: true
-    },
-     qrCodeUrl: {
-    type: String,
-  }
+       type: Object, 
+       default: {} 
+      },
+    qrCodeUrl: { 
+      type: String
+     },
+  },
+  { timestamps: true }
+);
 
-},{timestamps:true});
-
-module.exports = mongoose.model("Productmedicines", MedicineSchema);
+const ProductMedicine = mongoose.model<IProductMedicine>("ProductMedicine", MedicineSchema);
+export default ProductMedicine;
