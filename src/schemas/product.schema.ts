@@ -24,6 +24,8 @@ export const medicineSchema = z.object({
   imageUrl: z.string(),
   details: z.record(z.string(), z.any()).default({}),
   qrCodeUrl: z.string(),
+  scientificName: z.string().optional(),
+  strength: z.string().optional(),
 });
 
 

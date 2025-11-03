@@ -6,7 +6,7 @@ import ApiResponse from "../../utils/ApiResponse.js";
 import ProductMedicine from "../../models/Product.js"
 import CategoryMedicine from "../../models/Category.model.js";
 import SubcategoryMedicine from "../../models/subcategory.model.js";
-import type { IProductMedicine } from "../../types/product.type.js"
+import type { IProductMedicine } from "../../types/product.type.js";
 import fs from "fs";
 import csvParser from "csv-parser";
 import QRCode from "qrcode";
@@ -123,7 +123,6 @@ export const uploadCSV = asyncHandler(async (req: Request, res: Response) => {
 
   res.status(201).json(new ApiResponse(201, saved, "Medicines uploaded successfully"));
 });
-
 
 export const deleteMedicineById = asyncHandler(async (req, res) => {
   const { id } = req.params;

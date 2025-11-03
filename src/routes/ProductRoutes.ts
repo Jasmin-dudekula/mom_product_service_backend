@@ -13,7 +13,7 @@ import {
   filterByType,
   filterMedicines,
   filterByCreatedAtDate,
-  getExpMedCount 
+  getExpMedCount, 
 } from "../controllers/Products/ProductController.js";
 
 const router = express.Router();
@@ -29,9 +29,9 @@ router.get("/total", getMedicineCount);
 
 router.get("/exp", getExpiringMedicines);
 router.get("/expCount",getExpMedCount); 
+
 router.put("/edit/:id", updateMedicine);
 router.delete("/del/:id", deleteMedicineById);
-
 router.get("/filter-type", filterByType);
 router.get("/date", filterByCreatedAtDate);
 router.get("/filter", filterMedicines);
