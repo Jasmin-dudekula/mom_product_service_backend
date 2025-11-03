@@ -161,7 +161,6 @@ export const getExpMedCount = asyncHandler(async (_, res) => {
 });
 
 
-
 export const getProductById = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const med = await ProductMedicine.findById(id).populate("category subCategory");
