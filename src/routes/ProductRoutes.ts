@@ -28,8 +28,6 @@ router.get("/med/:id", getProductById);
 router.get("/total", getMedicineCount);
 
 router.get("/exp", getExpiringMedicines);
-router.get("/expCount",getExpMedCount); 
-
 router.put("/edit/:id", updateMedicine);
 router.delete("/del/:id", deleteMedicineById);
 router.get("/filter-type", filterByType);
