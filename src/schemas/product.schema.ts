@@ -15,17 +15,23 @@ export const medicineSchema = z.object({
   hsnCode: z.string().optional(),
   discount: z.string().optional(),
   updatedOn: z.coerce.date().optional(), 
-  expiry: z.coerce.date().optional(),
+  // expiry: z.coerce.date().optional(),
   manufactureDate: z.coerce.date().optional(),
   sellingPrice: z.number().optional(),
-  lastSoldDate: z.coerce.date().optional(),
-  stockStatus: z.enum(["in_stock", "low_stock", "out_of_stock"])
-    .default("in_stock"),
+  // lastSoldDate: z.coerce.date().optional(),
+  // stockStatus: z.enum(["in_stock", "low_stock", "out_of_stock"])
+  //   .default("in_stock"),
   imageUrl: z.string(),
   details: z.record(z.string(), z.any()).default({}),
   qrCodeUrl: z.string(),
   scientificName: z.string().optional(),
   strength: z.string().optional(),
+  dosage:z.enum(['BeforeFood','AfterFood']),
+  dosageTiming:z.enum(['Morning','After','Night']),
+  genderUse:z.enum(['Male','Female','Child']),
+  controlSubstance:z.enum(['Yes','No']),
+  prescriptionNeeded:z.enum(['Yes','No']),
+  coldChainFlag:z.enum(['Yes','No']),
 });
 
 
