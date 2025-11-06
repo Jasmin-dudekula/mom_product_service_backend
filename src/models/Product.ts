@@ -56,35 +56,54 @@ const MedicineSchema = new mongoose.Schema<IProductMedicine>(
     },
     updatedOn: { 
       type: Date, 
-      default: Date.now 
+      // default: Date.now 
     },
-    expiry: { 
-      type: Date
-     },
     manufactureDate: { 
       type: Date 
     },
     sellingPrice: {
-       type: Number 
+      type: Number 
       },
-    lastSoldDate: { 
-      type: Date
-     },
-    stockStatus: {
-      type: String,
-      enum: ["in_stock", "low_stock", "out_of_stock"],
-      default: "in_stock",
-    },
-    imageUrl: { 
-      type: String 
+    imageUrl:{
+      type:String
     },
     details: {
        type: Object, 
        default: {} 
-      },
-    qrCodeUrl: { 
-      type: String
      },
+     qrCodeUrl:{
+      type:String
+     },
+     scientificName:{
+      type:String
+     },
+     strength:{
+      type:String
+     },
+     dosage:{
+      type:String,
+      enum:['BeforeFood','AfterFood']
+     },
+     dosageTiming:{
+      type:String,
+      enum:['Morning','After','Night']
+     },
+     genderUse:{
+      type:String,
+      enum:['Male','Female','Child']
+     },
+     controlSubstance:{
+      type:String,
+      enum:['Yes','No']
+     },
+     prescriptionNeeded:{
+      type:String,
+      enum:['Yes','No']
+     },
+     coldChainFlag:{
+      type:String,
+      enum:['Yes','No']
+     }
   },
   { timestamps: true }
 );

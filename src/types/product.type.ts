@@ -4,11 +4,11 @@ import type { ProductZodSchema } from "../schemas/product.schema.js";
 
 export interface IProductMedicine extends Omit<ProductZodSchema, "category" | "subCategory">, Document {
   _id: Types.ObjectId;
-  category: Types.ObjectId;
+  category: Types.ObjectId;  
   subCategory: Types.ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
-  [key: string]: any;
+  createdAt?: Date;
+  updatedAt?: Date;
+  [key: string]: any;  //any new field 
 }
 
 

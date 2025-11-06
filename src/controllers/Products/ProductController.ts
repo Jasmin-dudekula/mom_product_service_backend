@@ -25,14 +25,12 @@ const s3 = new AWS.S3({
   },
 });
 
-
 const parseDate = (value?: string): Date | undefined => {
   if (!value || value.toLowerCase() === "n/a") return undefined;
   const parts = value.split("-");
   if (parts.length === 3) return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
   return undefined;
 };
-
 
 export const createManual = asyncHandler(async (req: Request, res: Response) => {
   const body = req.body as IProductMedicine;
@@ -62,66 +60,124 @@ export const createManual = asyncHandler(async (req: Request, res: Response) => 
 export const uploadCSV = asyncHandler(async (req: Request, res: Response) => {
   if (!req.file) throw new ApiError(400, "CSV file is required");
 
-  const medicines: Partial<IProductMedicine>[] = [];
-  const stream = fs.createReadStream(req.file.path).pipe(csvParser());
+  const filePath = req.file.path;
 
-  for await (const row of stream) {
-    const categoryName = row.category?.trim();
-    const subCategoryName = row.subCategory?.trim();
+  try {
+    //Pre-loading categories and subcategories
+    const categoriesCache = new Map<string, any>();
+    const subCategoriesCache = new Map<string, any>();
 
-    let category = await CategoryMedicine.findOne({ name: categoryName });
-    if (!category) category = await CategoryMedicine.create({ name: categoryName });
+    const medicines: Partial<IProductMedicine>[] = [];
+    const stream = fs.createReadStream(filePath).pipe(csvParser());
 
-    let subCategory = await SubcategoryMedicine.findOne({
-      name: subCategoryName,
-      category: category._id as Types.ObjectId,
-    });
-    if (!subCategory)
-      subCategory = await SubcategoryMedicine.create({
-        name: subCategoryName,
+    for await (const row of stream) {
+      const categoryName = row.category?.trim();
+      const subCategoryName = row.subCategory?.trim();
+      if (!categoryName || !subCategoryName) {
+        console.warn(`Skipping row due to missing category/subcategory: ${row.productId}`);
+        continue;
+      }
+      //Checking cache first,then database
+      let category = categoriesCache.get(categoryName);
+      if (!category) {
+        category = await CategoryMedicine.findOne({ name: categoryName });
+        if (!category) {
+          category = await CategoryMedicine.create({ name: categoryName });
+        }
+        categoriesCache.set(categoryName, category);
+      }
+
+      const subCategoryKey = `${subCategoryName}_${category._id}`;
+      let subCategory = subCategoriesCache.get(subCategoryKey);
+      if (!subCategory) {
+        subCategory = await SubcategoryMedicine.findOne({
+          name: subCategoryName,
+          category: category._id as Types.ObjectId,
+        });
+        if (!subCategory) {
+          subCategory = await SubcategoryMedicine.create({
+            name: subCategoryName,
+            category: category._id as Types.ObjectId,
+          });
+        }
+        subCategoriesCache.set(subCategoryKey, subCategory);
+      }
+      
+      medicines.push({
+        productId: row.productId,
+        name: row.name,
+        type: row.type, 
+        brandName: row.brandName,
+        batchNumber: row.batchNumber,
+        supplierName: row.supplierName,
         category: category._id as Types.ObjectId,
+        subCategory: subCategory._id as Types.ObjectId,
+        storageInstructions: row.storageInstructions,
+        quantityPerUnit: row.quantityPerUnit,
+        gst: row.gst || undefined,
+        hsnCode: row.hsnCode || undefined,
+        discount: row.discount || undefined,
+        updatedOn: parseDate(row.updatedOn),
+        manufactureDate: parseDate(row.manufactureDate),
+        sellingPrice: Number(row.sellingPrice || 0),
+        details: row.details ? JSON.parse(row.details) : {}, 
+        scientificName: row.scientificName || undefined,
+        strength: row.strength || undefined,
+        dosage: row.dosage, 
+        dosageTiming: row.dosageTiming, 
+        genderUse: row.genderUse, 
+        controlSubstance: row.controlSubstance,
+        prescriptionNeeded: row.prescriptionNeeded, 
+        coldChainFlag: row.coldChainFlag,
       });
+    }
 
-    medicines.push({
-      productId: row.productId,
-      name: row.name,
-      type: row.type,
-      brandName: row.brandName,
-      batchNumber: row.batchNumber,
-      supplierName: row.supplierName,
-      category: category._id as Types.ObjectId,
-      subCategory: subCategory._id as Types.ObjectId,
-      quantityPerUnit: row.quantityPerUnit,
-      storageInstructions: row.storageInstructions,
-      gst: row.gst,
-      hsnCode: row.hsnCode,
-      discount: row.discount,
-      updatedOn: parseDate(row.updatedOn),
-      expiry: parseDate(row.expiry),
-      manufactureDate: parseDate(row.manufactureDate),
-      sellingPrice: Number(row.sellingPrice || 0),
-      stockStatus: row.stockStatus || "in_stock",
+    const saved = await ProductMedicine.insertMany(medicines);
+
+    // Parallel QR generation with error handling
+    const qrPromises = saved.map(async (med) => {
+      try {
+        const qrBuffer = await QRCode.toBuffer(med._id.toString(), { type: "png" });
+        const uploadResult = await s3
+          .upload({
+            Bucket: process.env.AWS_BUCKET_NAME!,
+            Key: `qrcodes/medicine-${med._id}.png`,
+            Body: qrBuffer,
+            ContentType: "image/png",
+            ACL: "public-read",
+          })
+          .promise();
+        
+        med.qrCodeUrl = uploadResult.Location;
+        await med.save();
+        return { success: true, id: med._id };
+      } catch (error) {
+        console.error(`Failed to generate QR for medicine ${med._id}:`, error);
+        return { success: false, id: med._id };
+      }
     });
+
+    const qrResults = await Promise.all(qrPromises);
+    const failedCount = qrResults.filter(r => !r.success).length;
+
+    // File cleanup (success case)
+    fs.unlink(filePath, (err) => {
+      if (err) console.error("Failed to delete uploaded file:", err);
+    });
+
+    const message = failedCount > 0 
+      ? `Medicines uploaded successfully. ${failedCount} QR code(s) failed to generate.`
+      : "Medicines uploaded successfully";
+
+    res.status(201).json(new ApiResponse(201, saved, message));
+
+  } catch (error) {
+    // File cleanup (error case)
+    fs.unlink(filePath, (err) => {
+      if (err) console.error("Failed to delete uploaded file:", err);
+    });
+    throw error;
   }
-
-  const saved = await ProductMedicine.insertMany(medicines);
-
-  for (const med of saved) {
-    const qrBuffer = await QRCode.toBuffer(med._id.toString(), { type: "png" });
-    const uploadResult = await s3
-      .upload({
-        Bucket: process.env.AWS_BUCKET_NAME!,
-        Key: `qrcodes/medicine-${med._id}.png`,
-        Body: qrBuffer,
-        ContentType: "image/png",
-        ACL: "public-read",
-      })
-      .promise();
-    med.qrCodeUrl = uploadResult.Location;
-    await med.save();
-  }
-
-  res.status(201).json(new ApiResponse(201, saved, "Medicines uploaded successfully"));
 });
 
 export const deleteMedicineById = asyncHandler(async (req, res) => {
@@ -145,15 +201,13 @@ export const getMedicineCount = asyncHandler(async (_, res) => {
   res.status(200).json(new ApiResponse(200, total, "Total count fetched"));
 });
 
-export const getExpiringMedicines = asyncHandler(async (_, res) => {
-  const today = new Date();
-  const expDate = new Date();
-  expDate.setDate(today.getDate() + 10);
-  const expiring = await ProductMedicine.find({ expiry: { $lte:expDate} });
-  res.status(200).json(new ApiResponse(200, expiring, "Expiring medicines fetched"));
-});
-
-
+// export const getExpiringMedicines = asyncHandler(async (_, res) => {
+//   const today = new Date();
+//   const expDate = new Date();
+//   expDate.setDate(today.getDate() + 10);
+//   const expiring = await ProductMedicine.find({ expiry: { $lte:expDate} });
+//   res.status(200).json(new ApiResponse(200, expiring, "Expiring medicines fetched"));
+// });
 
 
 export const getProductById = asyncHandler(async (req, res) => {
@@ -165,7 +219,7 @@ export const getProductById = asyncHandler(async (req, res) => {
 });
 
 export const getAll= asyncHandler(async (req, res) => {
-  const { search, category, subCategory, type, stockStatus } = req.query;
+  const { search, category, subCategory, type, } = req.query;
 
   const query: Record<string, any> = {};
   if (search) {
@@ -174,13 +228,13 @@ export const getAll= asyncHandler(async (req, res) => {
       { name: regex },
       { brandName: regex },
       { batchNumber: regex },
-      { "details.scientificName": regex },
+      { scientificName: regex }
     ];
   }
   if (category) query.category = category;
   if (subCategory) query.subCategory = subCategory;
   if (type) query.type = type;
-  if (stockStatus) query.stockStatus = stockStatus;
+  // if (stockStatus) query.stockStatus = stockStatus;
 
   const meds = await ProductMedicine.find(query).populate("category subCategory");
   res.status(200).json(new ApiResponse(200, meds, "Medicines fetched successfully"));
@@ -211,42 +265,83 @@ export const filterByCreatedAtDate = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, meds, "Medicines filtered by createdAt date"));
 });
 
-
 export const filterMedicines = asyncHandler(async (req, res) => {
   const {
     category,
     subCategory,
     brandName,
     supplierName,
-    form,
     strength,
-    intakeroute,
-    doseTime,
-    doseFrequency,
+    dosageTiming,
     prescription,
+    dosage,
+    genderUse,
+    controlSubstance,
+    coldChainFlag,
+    page = 1,
+    limit = 50
   } = req.query;
 
   const filter: Record<string, any> = {};
 
+  // Parallel category lookups for better performance
+  const categoryPromises = [];
+
   if (category) {
-    const cat = await CategoryMedicine.findOne({ name: (category as string).trim() });
-    if (cat) filter.category = cat._id;
+    categoryPromises.push(
+      CategoryMedicine.findOne({ name: (category as string).trim() }).lean()
+    );
+  } else {
+    categoryPromises.push(Promise.resolve(null));
   }
 
   if (subCategory) {
-    const subCat = await SubcategoryMedicine.findOne({ name: (subCategory as string).trim() });
-    if (subCat) filter.subCategory = subCat._id;
+    categoryPromises.push(
+      SubcategoryMedicine.findOne({ name: (subCategory as string).trim() }).lean()
+    );
+  } else {
+    categoryPromises.push(Promise.resolve(null));
   }
+
+  const [cat, subCat] = await Promise.all(categoryPromises);
+
+  if (category && cat) filter.category = cat._id;
+  if (subCategory && subCat) filter.subCategory = subCat._id;
+
 
   if (brandName) filter.brandName = new RegExp(brandName as string, "i");
   if (supplierName) filter.supplierName = new RegExp(supplierName as string, "i");
-  if (prescription) filter["details.prescriptionRequired"] = prescription === "true";
-  if (form) filter["details.form"] = new RegExp(form as string, "i");
-  if (strength) filter["details.strength"] = new RegExp(strength as string, "i");
-  if (intakeroute) filter["details.route"] = new RegExp(intakeroute as string, "i");
-  if (doseTime) filter["details.dosageTiming"] = new RegExp(doseTime as string, "i");
-  if (doseFrequency) filter["details.dosageFrequency"] = new RegExp(doseFrequency as string, "i");
+  if (strength) filter.strength = new RegExp(strength as string, "i");
+  if (prescription) filter.prescriptionNeeded = prescription === "true" ? "Yes" : "No";
+  if (dosageTiming) filter.dosageTiming = dosageTiming; 
+  if (dosage) filter.dosage = dosage; 
+  if (genderUse) filter.genderUse = genderUse; 
+  if (controlSubstance) filter.controlSubstance = controlSubstance; 
+  if (coldChainFlag) filter.coldChainFlag = coldChainFlag; 
 
-  const medicines = await ProductMedicine.find(filter).populate("category subCategory");
-  res.status(200).json(new ApiResponse(200, medicines, "Filtered medicines fetched successfully"));
+  // Pagination to avoid all bulk result loading at once
+  const pageNum = parseInt(page as string);
+  const limitNum = Math.min(parseInt(limit as string), 100);
+  const skip = (pageNum - 1) * limitNum;
+
+  const [medicines, total] = await Promise.all([
+    ProductMedicine.find(filter)
+      .populate("category subCategory")
+      .skip(skip)
+      .limit(limitNum)
+      .lean(),
+    ProductMedicine.countDocuments(filter)
+  ]);
+
+  res.status(200).json(
+    new ApiResponse(200, {
+      medicines,
+      pagination: {
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum)
+      }
+    }, "Filtered medicines fetched successfully")
+  );
 });
