@@ -1,49 +1,119 @@
-import {ProductInventory} from 'mom-protos'
-import grpc, {type sendUnaryData, type ServerUnaryCall} from '@grpc/grpc-js'
+import { ProductInventory } from 'mom-protos'
+import grpc, { type sendUnaryData, type ServerUnaryCall } from '@grpc/grpc-js'
 import ProductMedicine from '../../models/Product.js'
 
-async function productDetails(call:ServerUnaryCall<ProductInventory.productRequest, ProductInventory.productResponse>, callback:sendUnaryData<ProductInventory.productResponse>){
-    const {productId} = call.request
-    console.log(productId)
-    const productDetails = await ProductMedicine.findOne({_id:productId})
-    if(productDetails){
-        console.log(productDetails)
+async function productDetails(
+    call: ServerUnaryCall<ProductInventory.productRequest, ProductInventory.productResponse>, callback: sendUnaryData<ProductInventory.productResponse>) {
+    try {
+        const { productId } = call.request
+        console.log('Fetching product details for ID:', productId)
+        const product = await ProductMedicine.findOne({ _id: productId })
+            .populate("category", "name")
+            .populate("subCategory", "name")
+            .lean()
+        console.log(product)
+        if (!product) {
+            console.warn('No product found for ID:', productId)
+            return callback(null, {
+                name: '',
+                type: '',
+                brandName: '',
+                batchNumber: '',
+                supplierName: '',
+                category: '',
+                subCategory: '',
+                storageInstructions: '',
+                quantityPerUnit: '',
+                gst: '',
+                hsnCode: '',
+                discount: '',
+                updatedOn: undefined,
+                manufactureDate: undefined,
+                sellingPrice: 0,
+                imageUrl: '',
+                details: {},
+                qrCodeUrl: '',
+                scientificName: '',
+                strength: '',
+                dosage: '',
+                dosageTiming: '',
+                genderUse: '',
+                idealDosage: '',
+                controlSubstance: '',
+                prescriptionNeeded: '',
+                coldChainFlag: ''
+            })
+        }
+
+        console.log('Found product:', product.name)
+
         callback(null, {
-            type: productDetails?.type || "",
-            name: productDetails?.name || "",
-            brandName: productDetails?.brandName || '',
-            batchNumber: productDetails?.batchNumber || '',
-            supplierName: productDetails?.supplierName || '',
-            category: productDetails?.category.toString() || '',
-            subCategory: productDetails?.subCategory.toString() || '',
-            storageInstructions: productDetails?.storageInstructions || '',
-            quantityPerUnit: productDetails?.quantityPerUnit || '',
-            gst: productDetails?.gst || '',
-            hsnCode: productDetails?.hsnCode || '',
-            discount: productDetails?.discount || '',
+            type: product?.type || '',
+            name: product?.name || '',
+            brandName: product?.brandName || '',
+            batchNumber: product?.batchNumber || '',
+            supplierName: product?.supplierName || '',
+            category: product?.category?.name || '',
+            subCategory: product?.subCategory?.name || '',
+            storageInstructions: product?.storageInstructions || '',
+            quantityPerUnit: product?.quantityPerUnit || '',
+            gst: product?.gst || '',
+            hsnCode: product?.hsnCode || '',
+            discount: product?.discount || '',
             updatedOn: undefined,
             manufactureDate: undefined,
             sellingPrice: 0,
-            imageUrl: productDetails?.imageUrl || '',
+            imageUrl: product?.imageUrl || '',
             details: {},
-            qrCodeUrl: productDetails?.qrCodeUrl || '',
-            scientificName: productDetails?.scientificName || '',
-            strength: productDetails?.strength || '',
-            dosage: productDetails?.dosage || '',
-            dosageTiming: productDetails?.dosageTiming || '',
-            genderUse: productDetails?.genderUse || '',
-            controlSubstance: productDetails?.controlSubstance || '',
-            prescriptionNeeded: productDetails?.prescriptionNeeded || '',
-            coldChainFlag: productDetails?.coldChainFlag || ''
+            qrCodeUrl: product?.qrCodeUrl || '',
+            scientificName: product?.scientificName || '',
+            strength: product?.strength || '',
+            dosage: product?.dosage || '',
+            dosageTiming: product?.dosageTiming || '',
+            genderUse: product?.genderUse || '',
+            idealDosage: product?.idealDosage || '',
+            controlSubstance: product?.controlSubstance || '',
+            prescriptionNeeded: product?.prescriptionNeeded || '',
+            coldChainFlag: product?.coldChainFlag || ''
+        })
+    } catch (error) {
+        callback(null, {
+            name: '',
+            type: '',
+            brandName: '',
+            batchNumber: '',
+            supplierName: '',
+            category: '',
+            subCategory: '',
+            storageInstructions: '',
+            quantityPerUnit: '',
+            gst: '',
+            hsnCode: '',
+            discount: '',
+            updatedOn: undefined,
+            manufactureDate: undefined,
+            sellingPrice: 0,
+            imageUrl: '',
+            details: {},
+            qrCodeUrl: '',
+            scientificName: '',
+            strength: '',
+            dosage: '',
+            dosageTiming: '',
+            genderUse: '',
+            idealDosage: '',
+            controlSubstance: '',
+            prescriptionNeeded: '',
+            coldChainFlag: ''
         })
     }
 }
 
 function getproducts() {
-    var server = new grpc.Server()
-    server.addService(ProductInventory.productDataService, {
-        productDetails
-    })
+    const server = new grpc.Server()
+    server.addService(ProductInventory.productDataService, { productDetails })
     return server
 }
+
 export default getproducts
+
