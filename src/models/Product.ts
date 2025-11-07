@@ -3,17 +3,17 @@ import type { IProductMedicine} from "../types/product.type.ts";
 
 const MedicineSchema = new mongoose.Schema<IProductMedicine>(
   {
-    productId: 
-    { type: String, 
-      required: true 
-    },
+    // productId: 
+    // { type: String, 
+     
+    // },
     name: 
     { type: String, 
       required: true 
     },
     type: { 
       type: String, 
-      enum: ["medicine", "nonmedicine"],
+      enum: ["Medicine", "Non-Medicine"],
       required: true 
     },
     brandName: { 
@@ -82,16 +82,21 @@ const MedicineSchema = new mongoose.Schema<IProductMedicine>(
      },
      dosage:{
       type:String,
-      enum:['BeforeFood','AfterFood']
+      enum:['Before Food','After Food']
      },
      dosageTiming:{
       type:String,
-      enum:['Morning','After','Night']
+      enum:['Morning','Afternoon','Night']
      },
      genderUse:{
       type:String,
-      enum:['Male','Female','Child']
+      enum:['Male','Female','Child','All']
      },
+
+     idealDosage:{
+      type:String,
+     },
+
      controlSubstance:{
       type:String,
       enum:['Yes','No']
