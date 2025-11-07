@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 export const medicineSchema = z.object({
-  productId: z.string(),
+  // productId: z.string(),
   name: z.string(),
-  type: z.enum(["medicine", "nonmedicine"]),
+  type: z.enum(["Medicine", "Non-Medicine"]),
   brandName: z.string(),
   batchNumber: z.string(),
   supplierName: z.string(),
@@ -22,13 +22,13 @@ export const medicineSchema = z.object({
   // stockStatus: z.enum(["in_stock", "low_stock", "out_of_stock"])
   //   .default("in_stock"),
   imageUrl: z.string(),
-  details: z.record(z.string(), z.any()).default({}),
   qrCodeUrl: z.string(),
   scientificName: z.string().optional(),
   strength: z.string().optional(),
-  dosage:z.enum(['BeforeFood','AfterFood']),
-  dosageTiming:z.enum(['Morning','After','Night']),
-  genderUse:z.enum(['Male','Female','Child']),
+  dosage:z.enum(['Before Food','After Food']),
+  dosageTiming:z.enum(['Morning','Afternoon','Night']),
+  idealDosage:z.string(),
+  genderUse:z.enum(['Male','Female','Child','All']),
   controlSubstance:z.enum(['Yes','No']),
   prescriptionNeeded:z.enum(['Yes','No']),
   coldChainFlag:z.enum(['Yes','No']),

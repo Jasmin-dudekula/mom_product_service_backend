@@ -104,7 +104,7 @@ export const uploadCSV = asyncHandler(async (req: Request, res: Response) => {
       }
       
       medicines.push({
-        productId: row.productId,
+        // productId: row.productId,
         name: row.name,
         type: row.type, 
         brandName: row.brandName,
@@ -120,15 +120,18 @@ export const uploadCSV = asyncHandler(async (req: Request, res: Response) => {
         updatedOn: parseDate(row.updatedOn),
         manufactureDate: parseDate(row.manufactureDate),
         sellingPrice: Number(row.sellingPrice || 0),
-        details: row.details ? JSON.parse(row.details) : {}, 
+        imageUrl:row.imageUrl || undefined,
+        // details: row.details ? JSON.parse(row.details) : {}, 
         scientificName: row.scientificName || undefined,
         strength: row.strength || undefined,
         dosage: row.dosage, 
         dosageTiming: row.dosageTiming, 
+        idealDosage:row.idealDosage,       
         genderUse: row.genderUse, 
         controlSubstance: row.controlSubstance,
         prescriptionNeeded: row.prescriptionNeeded, 
         coldChainFlag: row.coldChainFlag,
+        
       });
     }
 
