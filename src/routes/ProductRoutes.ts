@@ -12,6 +12,7 @@ import {
   filterByType,
   filterMedicines,
   filterByCreatedAtDate,
+  deleteAllMedicines,
 } from "../controllers/Products/ProductController.js";
 
 const router = express.Router();
@@ -31,6 +32,7 @@ router.delete("/del/:id", deleteMedicineById);
 router.get("/filter-type", filterByType);
 router.get("/date", filterByCreatedAtDate);
 router.get("/filter", filterMedicines);
+router.delete('/delete', deleteAllMedicines);
 
 export default router;
 
