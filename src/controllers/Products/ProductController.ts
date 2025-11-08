@@ -245,9 +245,7 @@ export const getAll= asyncHandler(async (req, res) => {
 
 export const filterByType = asyncHandler(async (req, res) => {
   const { type } = req.query;
-  if (!type || !["medicine", "nonmedicine"].includes(type as string))
-    throw new ApiError(400, "Invalid type. Use 'medicine' or 'nonmedicine'");
-
+  console.log(type)
   const meds = await ProductMedicine.find({ type }).populate("category subCategory");
   res.status(200).json(new ApiResponse(200, meds, `${type} products fetched successfully`));
 });
@@ -347,4 +345,11 @@ export const filterMedicines = asyncHandler(async (req, res) => {
       }
     }, "Filtered medicines fetched successfully")
   );
+});
+
+  export const deleteAllMedicines = asyncHandler(async (req, res) => {
+  const result = await ProductMedicine.deleteMany({});
+  res
+    .status(200)
+    .json(new ApiResponse(200, result, "All medicines deleted successfully"));
 });
