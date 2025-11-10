@@ -1,6 +1,9 @@
 
 import express from "express";
 import multer from "multer";
+import ProductMedicine from "../models/Product.js";
+import CategoryMedicine from "../models/Category.model.js";
+import SubcategoryMedicine from "../models/subcategory.model.js";
 import {
   createManual,
   uploadCSV,
@@ -32,6 +35,7 @@ router.delete("/del/:id", deleteMedicineById);
 router.get("/filter-type", filterByType);
 router.get("/date", filterByCreatedAtDate);
 router.get("/filter", filterMedicines);
+
 router.delete('/delete', deleteAllMedicines);
 
 export default router;
