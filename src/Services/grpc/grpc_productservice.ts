@@ -18,7 +18,7 @@ async function productDetails(
                 name: '',
                 type: '',
                 brandName: '',
-                batchNumber: '',
+                // batchNumber: '',
                 supplierName: '',
                 category: '',
                 subCategory: '',
@@ -26,8 +26,8 @@ async function productDetails(
                 quantityPerUnit: '',
                 gst: '',
                 hsnCode: '',
-                discount: '',
-                updatedOn: undefined,
+                // discount: '',
+                // updatedOn: undefined,
                 manufactureDate: undefined,
                 sellingPrice: 0,
                 imageUrl: '',
@@ -41,7 +41,10 @@ async function productDetails(
                 idealDosage: '',
                 controlSubstance: '',
                 prescriptionNeeded: '',
-                coldChainFlag: ''
+                coldChainFlag: '',
+                batchNumber: '',
+                discount: '',
+                updatedOn: undefined
             })
         }
 
@@ -51,7 +54,7 @@ async function productDetails(
             type: product?.type || '',
             name: product?.name || '',
             brandName: product?.brandName || '',
-            batchNumber: product?.batchNumber || '',
+            // batchNumber: product?.batchNumber || '',
             supplierName: product?.supplierName || '',
             category: product?.category?.name || '',
             subCategory: product?.subCategory?.name || '',
@@ -59,8 +62,8 @@ async function productDetails(
             quantityPerUnit: product?.quantityPerUnit || '',
             gst: product?.gst || '',
             hsnCode: product?.hsnCode || '',
-            discount: product?.discount || '',
-            updatedOn: undefined,
+            // discount: product?.discount || '',
+            // updatedOn: undefined,
             manufactureDate: undefined,
             sellingPrice: 0,
             imageUrl: product?.imageUrl || '',
@@ -74,14 +77,17 @@ async function productDetails(
             idealDosage: product?.idealDosage || '',
             controlSubstance: product?.controlSubstance || '',
             prescriptionNeeded: product?.prescriptionNeeded || '',
-            coldChainFlag: product?.coldChainFlag || ''
+            coldChainFlag: product?.coldChainFlag || '',
+            batchNumber: '',
+            updatedOn: undefined,
+            discount: ''
         })
     } catch (error) {
         callback(null, {
             name: '',
             type: '',
             brandName: '',
-            batchNumber: '',
+            // batchNumber: '',
             supplierName: '',
             category: '',
             subCategory: '',
@@ -89,8 +95,8 @@ async function productDetails(
             quantityPerUnit: '',
             gst: '',
             hsnCode: '',
-            discount: '',
-            updatedOn: undefined,
+            // discount: '',
+            // updatedOn: undefined,
             manufactureDate: undefined,
             sellingPrice: 0,
             imageUrl: '',
@@ -104,7 +110,10 @@ async function productDetails(
             idealDosage: '',
             controlSubstance: '',
             prescriptionNeeded: '',
-            coldChainFlag: ''
+            coldChainFlag: '',
+            batchNumber: '',
+            discount: '',
+            updatedOn: undefined
         })
     }
 }

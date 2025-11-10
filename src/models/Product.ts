@@ -20,10 +20,10 @@ const MedicineSchema = new mongoose.Schema<IProductMedicine>(
       type: String, 
       required: true
      },
-    batchNumber: {
-      type: String,
-      required: true
-    },
+    // batchNumber: {
+    //   type: String,
+    //   required: true
+    // },
     supplierName: { 
     type: String, 
     required: true 
@@ -54,10 +54,10 @@ const MedicineSchema = new mongoose.Schema<IProductMedicine>(
     discount: { 
       type: String 
     },
-    updatedOn: { 
-      type: Date, 
-      // default: Date.now 
-    },
+    // updatedOn: { 
+    //   type: Date, 
+    //   // default: Date.now 
+    // },
     manufactureDate: { 
       type: Date 
     },
