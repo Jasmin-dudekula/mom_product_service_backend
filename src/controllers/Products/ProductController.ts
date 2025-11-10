@@ -108,7 +108,7 @@ export const uploadCSV = asyncHandler(async (req: Request, res: Response) => {
         name: row.name,
         type: row.type, 
         brandName: row.brandName,
-        batchNumber: row.batchNumber,
+        // batchNumber: row.batchNumber,
         supplierName: row.supplierName,
         category: category._id as Types.ObjectId,
         subCategory: subCategory._id as Types.ObjectId,
@@ -116,8 +116,8 @@ export const uploadCSV = asyncHandler(async (req: Request, res: Response) => {
         quantityPerUnit: row.quantityPerUnit,
         gst: row.gst || undefined,
         hsnCode: row.hsnCode || undefined,
-        discount: row.discount || undefined,
-        updatedOn: parseDate(row.updatedOn),
+        // discount: row.discount || undefined,
+        // updatedOn: parseDate(row.updatedOn),
         manufactureDate: parseDate(row.manufactureDate),
         sellingPrice: Number(row.sellingPrice || 0),
         imageUrl:row.imageUrl || undefined,
@@ -136,6 +136,8 @@ export const uploadCSV = asyncHandler(async (req: Request, res: Response) => {
     }
 
     const saved = await ProductMedicine.insertMany(medicines);
+
+    console.log("from productcontroller", saved)
 
     // Parallel QR generation with error handling
     const qrPromises = saved.map(async (med) => {
@@ -280,7 +282,7 @@ export const filterMedicines = asyncHandler(async (req, res) => {
     controlSubstance,
     coldChainFlag,
     page = 1,
-    limit = 50
+    limit = 8
   } = req.query;
 
   const filter: Record<string, any> = {};
