@@ -51,9 +51,9 @@ const MedicineSchema = new mongoose.Schema<IProductMedicine>(
     hsnCode: { 
       type: String
      },
-    discount: { 
-      type: String 
-    },
+    // discount: { 
+    //   type: String 
+    // },
     // updatedOn: { 
     //   type: Date, 
     //   // default: Date.now 
