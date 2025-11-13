@@ -63,7 +63,6 @@ export const uploadCSV = asyncHandler(async (req: Request, res: Response) => {
   const filePath = req.file.path;
 
   try {
-    //Pre-loading categories and subcategories
     const categoriesCache = new Map<string, any>();
     const subCategoriesCache = new Map<string, any>();
 
@@ -77,7 +76,7 @@ export const uploadCSV = asyncHandler(async (req: Request, res: Response) => {
         console.warn(`Skipping row due to missing category/subcategory: ${row.productId}`);
         continue;
       }
-      //Checking cache first,then database
+
       let category = categoriesCache.get(categoryName);
       if (!category) {
         category = await CategoryMedicine.findOne({ name: categoryName });
@@ -139,7 +138,7 @@ export const uploadCSV = asyncHandler(async (req: Request, res: Response) => {
 
     console.log("from productcontroller", saved)
 
-    // Parallel QR generation with error handling
+
     const qrPromises = saved.map(async (med) => {
       try {
         const qrBuffer = await QRCode.toBuffer(med._id.toString(), { type: "png" });
@@ -165,7 +164,6 @@ export const uploadCSV = asyncHandler(async (req: Request, res: Response) => {
     const qrResults = await Promise.all(qrPromises);
     const failedCount = qrResults.filter(r => !r.success).length;
 
-    // File cleanup (success case)
     fs.unlink(filePath, (err) => {
       if (err) console.error("Failed to delete uploaded file:", err);
     });
@@ -177,7 +175,6 @@ export const uploadCSV = asyncHandler(async (req: Request, res: Response) => {
     res.status(201).json(new ApiResponse(201, saved, message));
 
   } catch (error) {
-    // File cleanup (error case)
     fs.unlink(filePath, (err) => {
       if (err) console.error("Failed to delete uploaded file:", err);
     });
@@ -286,11 +283,10 @@ export const filterMedicines = asyncHandler(async (req: Request, res: Response):
     page = 1,
     limit = 8
   } = req.query;
-  console.log("rom ",req.query)
+  console.log("rom ", req.query)
 
   const filter: Record<string, any> = {};
 
-  // 🔹 Date filter
   if (createdAt) {
     const start = new Date(createdAt as string);
     const end = new Date(createdAt as string);
@@ -298,12 +294,10 @@ export const filterMedicines = asyncHandler(async (req: Request, res: Response):
     filter.createdAt = { $gte: start, $lte: end };
   }
 
-  // 🔹 Type filter
   if (type && ["Medicine", "Non-Medicine"].includes((type as string))) {
     filter.type = type;
   }
 
-  // 🔹 Helper: find category/subcategory IDs by names
   const getIdsByNames = async (
     Model: any,
     names: string | string[]
@@ -316,19 +310,17 @@ export const filterMedicines = asyncHandler(async (req: Request, res: Response):
     return docs.map((doc: any) => doc._id);
   };
 
-  // 🔹 Category filter
   if (category) {
     const categoryIds = await getIdsByNames(CategoryMedicine, category);
     if (categoryIds.length) filter.category = { $in: categoryIds };
   }
 
-  // 🔹 SubCategory filter
+
   if (subCategory) {
     const subCategoryIds = await getIdsByNames(SubcategoryMedicine, subCategory);
     if (subCategoryIds.length) filter.subCategory = { $in: subCategoryIds };
   }
 
-  // 🔹 Helper for regex-based filters (case-insensitive & multi-value)
   const regexFilter = (val: unknown): Record<string, any> | undefined => {
     if (!val) return undefined;
     const arr = Array.isArray(val)
@@ -338,7 +330,7 @@ export const filterMedicines = asyncHandler(async (req: Request, res: Response):
     return { $in: arr.map((v) => new RegExp(`^${v}$`, "i")) };
   };
 
-  // 🔹 Apply text-based filters
+
   const brandRegex = regexFilter(brandName);
   if (brandRegex) filter.brandName = brandRegex;
 
@@ -360,16 +352,13 @@ export const filterMedicines = asyncHandler(async (req: Request, res: Response):
   const freqRegex = regexFilter(doseFrequency);
   if (freqRegex) filter["details.dosageFrequency"] = freqRegex;
 
-  // 🔹 Boolean filter
   if (prescription !== undefined)
     filter["details.prescriptionRequired"] = prescription === "true";
 
-  // 🔹 Pagination
   const pageNum = parseInt(page as string, 10);
   const limitNum = Math.min(parseInt(limit as string, 10), 100);
   const skip = (pageNum - 1) * limitNum;
 
-  // 🔹 Fetch data
   const [medicines, total] = await Promise.all([
     ProductMedicine.find(filter)
       .populate("category subCategory")
@@ -379,9 +368,8 @@ export const filterMedicines = asyncHandler(async (req: Request, res: Response):
     ProductMedicine.countDocuments(filter),
   ]);
 
-  console.log("from medicines",medicines)
+  console.log("from medicines", medicines)
 
-  // 🔹 Response
   res.status(200).json(
     new ApiResponse(
       200,
